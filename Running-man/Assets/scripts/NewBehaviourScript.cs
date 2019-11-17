@@ -52,7 +52,9 @@ public class NewBehaviourScript : MonoBehaviour
     public int state = 0;//角色狀態
     public GameObject final;
     public Text textDiamond, textTime, textTotal;
-    public int scoreDiamond, scoreTime, scoreTotal;
+    //public int scoreDiamond, scoreTime, scoreTotal;
+    public int[] score = new int[4];
+    public int gameTime;//紀錄遊戲時間
     #endregion
     void Start()
     {
@@ -63,14 +65,16 @@ public class NewBehaviourScript : MonoBehaviour
         sp = GetComponent<SpriteRenderer>();
         
         hp_Max = hp;
+       
     }
 
     void Update()
     {
+        
         DogMove();//角色移動
         CameraMove();//相機移動
         Character_state();//播放角色動畫
-        HP();
+        HP();//血調控制
         //Final();
     }
 
@@ -80,6 +84,7 @@ public class NewBehaviourScript : MonoBehaviour
     /// </summary>
     private void OnCollisionEnter2D(Collision2D collision)
     {
+       
         if (collision.gameObject.name=="地板" && state!=2)
         {
           
@@ -130,6 +135,7 @@ public class NewBehaviourScript : MonoBehaviour
         
         // 設定圖塊 (位置，無)
         tilemap.SetTile(tilemap.WorldToCell(hitPosition), null);
+        hp += 50;
     }
 
     /// <summary>
@@ -180,6 +186,7 @@ public class NewBehaviourScript : MonoBehaviour
         tex.text = count_Diamond.ToString();
         Destroy(collision.gameObject);
     }
+  
     /// <summary>
     /// 角色滑行
     /// </summary>
@@ -252,29 +259,43 @@ public class NewBehaviourScript : MonoBehaviour
     /// </summary>
     public void Final()
     {
+        gameTime = (int)Time.timeSinceLevelLoad;// 紀錄遊戲時間
         if (final.activeInHierarchy == false)
         {
             final.SetActive(true);
-            StartCoroutine(other(count_Diamond,scoreDiamond,100,textDiamond));
+            StartCoroutine(other(count_Diamond,0, 100,textDiamond));
             
+            StartCoroutine(other(gameTime, 1, 100, textTime));
         }
         else return;
     }
 
-    /// <summary>
-    /// 開啟協同
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator other(int count,int score,int addscore,Text text)
+  /// <summary>
+  /// 計算總分
+  /// </summary>
+  /// <param name="count">鑽石數量</param>
+  /// <param name="score">存放分數</param>
+  /// <param name="addscore">增加分數</param>
+  /// <param name="text">顯示分數顯示文字</param>
+  /// <returns></returns>
+    private IEnumerator other(int count,int scoreIndex,int addscore,Text text)
     {
-        while (count_Diamond > 0)
+        while (count > 0)
         {
             count--;
-            score += addscore;
-            text.text = score.ToString();
+            score[scoreIndex] += addscore;
+            text.text = score[scoreIndex].ToString();
             yield return new WaitForSeconds(0.1f);
+
         }
-       // StopCoroutine(other(int count, int score, int addscore, Text text));
+       
+        if (scoreIndex == 1)
+        {
+            score[2]=(score[0] + score[1])/100;
+           StartCoroutine( other(score[2], 3, 100, textTotal));
+        }
+       
+       
     }
     #endregion
 }
