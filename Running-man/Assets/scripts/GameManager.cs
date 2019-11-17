@@ -7,6 +7,7 @@ public class GameManager : MonoBehaviour
 {
     public Image imageLoad;
     public Text textLoad;
+    public Text anyKey;
     public void ReStart()
     {
         SceneManager.LoadScene("關卡1");
@@ -28,9 +29,23 @@ public class GameManager : MonoBehaviour
 
         while (ao.isDone == false)
         {
-            textLoad.text = ao.progress + "/100";
+            textLoad.text = ao.progress/0.9f*100 + "/100";
+            imageLoad.fillAmount = ao.progress / 0.9f;
             yield return null;
+            if (ao.progress==0.9f)
+            {
+                anyKey.text = "請按任意鍵...";
+            }
+            if (ao.progress == 0.9f && Input.anyKey)
+            {
+                
+                ao.allowSceneActivation = true;
+
+            }
+
         }
+       
+       
     }
 
 }
